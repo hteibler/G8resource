@@ -4,9 +4,7 @@ with Cloudspaces and VMs
 
 by start and end date
 per account
-<<<<<<< HEAD
 
 # CLI
    export_all_in_zip.py list
    export_all_in_zip.py <account id>
-   
