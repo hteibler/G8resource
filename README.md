@@ -1,2 +1,4 @@
 # G8resource
-get excel out of Resource consumption 
+create an excelsheet out of Resource consumption info
+by start and end date
+per account
