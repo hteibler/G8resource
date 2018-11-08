@@ -168,8 +168,8 @@ ws['P'+str(idx)]= 'Win'
 ws['Q'+str(idx)]= 'Redhat'
 ws['R'+str(idx)]= '----'
 
-mi = []
-ci = []
+mi = []  # list of VMs
+ci = []  # list of Cloudspaces
 
 with zipfile.ZipFile(temp_zipfile) as zfile:
     for file in zfile.namelist():
@@ -206,12 +206,18 @@ with zipfile.ZipFile(temp_zipfile) as zfile:
                 mem += machine.mem
                 #print ("cpuMinutes:",machine.cpuMinutes," status:",machine.status)
                 #print (cs.cloudSpaceId,"  ",machine.id,"  ",machine.imageName)
+
+                # count licenses
+                # windows per vCPU
                 if machine.imageName.find('Windows') >=0:
                     win += 1
-                    m_win = 1
+                    m_win = machine.vcpus
+                # redhat 1x lic if <=4 and if > 4 vCPU 2x lic
                 if machine.imageName.find('Redhat') >=0:
                     redhat += 1
                     m_rh = 1
+                    if machine.vcpus > 4:
+                        m_rh = 1
 
                 for disk in machine.disks:
                     disk_iops_read += disk.iopsRead
@@ -278,13 +284,16 @@ ws = wb['Summary']
 ai = getAccountInfo(account)
 ws['B5'] = ai[1]
 i = 13
-for cc in enumerate(ci):
-    ws['B'+str(i)] = cc[1]
+ci_sort = sorted(ci)
+for cc in enumerate(ci_sort):
+    actRow = str(i)
+    ws['B'+actRow] = cc[1]
     c = getCSInfo(cc[1])
-    ws['J'+str(i)] = c[0]
-    ws['K'+str(i)] = c[1]
-    ws['L'+str(i)] = c[2]
-    ws['M'+str(i)] = c[3]
+
+    ws['L'+actRow] = c[0]
+    ws['M'+actRow] = c[1]
+    ws['N'+actRow] = c[2]
+    ws['O'+actRow] = c[3]
     i += 1
 
 i=7
@@ -295,27 +304,31 @@ for x in mi_sort:
     if cs != x[0]:
         i += 1
         cs = x[0]
-    ws['A'+str(i)] = x[0]
-    ws['B'+str(i)] = x[1]
-    ws['C'+str(i)] = x[2]
-    ws['D'+str(i)] = x[3]
-    ws['E'+str(i)] = x[4]
-    ws['F'+str(i)] = x[5]
-    ws['G'+str(i)] = x[6]
-    ws['H'+str(i)] = x[7]
-    ws['I'+str(i)] = x[8]
-    ws['J'+str(i)] = x[9]
-    ws['L'+str(i)] = "=param!C2*D"+str(i)
-    ws['M'+str(i)] = "=param!C3*E"+str(i)
-    ws['N'+str(i)] = "=param!C4*F"+str(i)
-    ws['O'+str(i)] = "=param!C5*G"+str(i)
-    ws['P'+str(i)] = "=param!C6*H"+str(i)
-    ws['Q'+str(i)] = "=param!C7*I"+str(i)
-    ws['R'+str(i)] = "=param!C8*J"+str(i)
-    if x[2].find('Windows') >= 0:
-        ws['S'+str(i)] = "=param!B7"
-    if x[2].find('Redhat') >= 0:
-        ws['T'+str(i)] = "=param!B8"
-
+    actRow = str(i)
+    ws['A'+actRow] = x[0]
+    ws['B'+actRow] = x[1]
+    ws['C'+actRow] = x[2]
+    ws['D'+actRow] = x[3]
+    ws['E'+actRow] = x[4]
+    ws['F'+actRow] = x[5]
+    ws['G'+actRow] = x[6]
+    ws['H'+actRow] = x[7]
+    ws['I'+actRow] = x[8]
+    ws['J'+actRow] = x[9]
+    ws['L'+actRow] = "=param!C2*D"+actRow
+    ws['M'+actRow] = "=param!C3*E"+actRow
+    ws['N'+actRow] = "=param!C4*F"+actRow
+    ws['O'+actRow] = "=param!C5*G"+actRow
+    ws['P'+actRow] = "=param!C6*H"+actRow
+    ws['Q'+actRow] = "=param!C7*I"+actRow
+    ws['R'+actRow] = "=param!C8*J"+actRow
+#    if x[2].find('Windows') >= 0:
+#        ws['S'+actRow] = "=param!B7*D"+actRow
+#    if x[2].find('Redhat') >= 0:
+#        if x[]
+#        ws['T'+actRow] = "=param!B8"
+    ws['U'+actRow] = "=SUM(L"+actRow+":N"+actRow+")"
+    ws['V'+actRow] = "=U"+actRow+"+Q"+actRow+"+R"+actRow
+#
     i +=1
 wb.save(xlsfile)
